@@ -144,17 +144,11 @@ export const AddCustomer = () => {
                     onChange={ handleChange }
                     value={formData.status}
                    >
-                        <option>active</option>
-                        <option>inactive</option>
-                        <option>deleted</option>
+                        <option value="active">active</option>
+                        <option value="inactive">inactive</option>
+                        <option value="deleted">deleted</option>
                     </select>
-                    {/* <input
-                    type="text"
-                    name="status"
-                    id="status"
-                    placeholder="User Status"
-                    class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-                    /> */}
+                    
                 </div>
                 <div>
                     <button

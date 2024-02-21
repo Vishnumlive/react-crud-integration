@@ -2,13 +2,25 @@ import { useEffect, useState } from "react"
 
 export const CustomerList = () => {
 
+    const initialUserData = {
+        "firstName" : "",
+        "middleName" : "",
+        "lastName" : "",
+        "dateOfBirth" : "",
+        "status" : "",
+    }
+
     const [customers, setCustomers] = useState([{}]);
 
     const [deleted, setDeleted ] = useState(false);
 
+    const [updated, setUpdated ] = useState(false);
+
     const [editEnable, setEditEnable] = useState(false);
 
-    console.log(deleted);
+    const [singleUser, setSingleUser] = useState(initialUserData);
+
+    
     useEffect(()=>{
 
         var url = "http://localhost:8000/customers";
@@ -16,7 +28,7 @@ export const CustomerList = () => {
         async function fetchCustomer(){
             try {
                 const result = await fetch(url);
-                const data = await result.json(result);
+                const data = await result.json();
 
                 const formatedData = data.map((item) => (
                     {
@@ -28,6 +40,7 @@ export const CustomerList = () => {
                     })
                 }))
                 setDeleted(false);
+                setUpdated(false);
                 setCustomers(formatedData);
                 console.log(data);
             } catch (error) {
@@ -37,7 +50,7 @@ export const CustomerList = () => {
         }
 
         fetchCustomer();
-    },[deleted])
+    },[deleted,updated])
 
     async function deleteCustomer(userid){
         
@@ -57,9 +70,54 @@ export const CustomerList = () => {
             setDeleted(true);
         }
 
-        const data = await result.json(result);
+    }
 
+    async function getUser(userid){
+        var url = `http://localhost:8000/customer/${userid}`;
+
+        const result = await fetch(url);
+        const data = await result.json();
         
+        if(data){
+
+            data.dateOfBirth = formatDate(data.dateOfBirth);
+            setSingleUser(data);
+        }
+    }
+
+    async function updateUser(userData){
+        var url = `http://localhost:8000/customer/${userData._id}`
+
+        const result = await fetch(url,{
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              
+            },
+            body: JSON.stringify(userData),
+        });
+
+        const data = await result.json();
+        
+        if(data){
+
+            setUpdated(true);
+            console.log("User Updated");
+        }
+    }
+
+    function formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+    
+        if (month.length < 2) 
+            month = '0' + month;
+        if (day.length < 2) 
+            day = '0' + day;
+    
+        return [year, month, day].join('-');
     }
 
     const handleDelete = (userid) => {
@@ -68,10 +126,27 @@ export const CustomerList = () => {
     }
 
     const handleCustomerEdit = (userid) => {
+        getUser(userid);
         setEditEnable(true);
     }
 
     const handleCloseModal = () => {
+        setEditEnable(false);
+    }
+
+    const handleChange = (event) =>{
+        setSingleUser({
+            ...singleUser,
+            [event.target.name] : event.target.value
+        })
+
+    }
+
+    const handleEditSubmit = (event) =>{
+        event.preventDefault();
+        
+        updateUser(singleUser);
+
         setEditEnable(false);
     }
 
@@ -315,7 +390,7 @@ export const CustomerList = () => {
 </section>
 
     
-    { editEnable == true && (
+    { editEnable === true && (
         <div className="modal-overlay">
             <div className="modal">
                 <button className="modal-close-btn" onClick={handleCloseModal}>
@@ -328,7 +403,7 @@ export const CustomerList = () => {
                 <div className="flex items-center justify-center p-12">
 
                     <div className="mx-auto w-full max-w-[550px]">
-                        <form  action="" method="POST">
+                        <form  onSubmit={ handleEditSubmit } action="" method="POST">
                         <div className="mb-5">
                             <label
                             htmlFor="firstName"
@@ -340,8 +415,8 @@ export const CustomerList = () => {
                             type="text"
                             name="firstName"
                             id="firstName"
-                            
-                            // value={formData.firstName}
+                            onChange={ handleChange }
+                            value={singleUser.firstName}
                             placeholder="First Name"
                             className="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
                             />
@@ -357,8 +432,8 @@ export const CustomerList = () => {
                             type="text"
                             name="middleName"
                             id="middleName"
-                            
-                            // value={formData.middleName}
+                            onChange={ handleChange }
+                            value={singleUser.middleName}
                             placeholder="Middle Name"
                             className="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
                             />
@@ -374,8 +449,8 @@ export const CustomerList = () => {
                             type="text"
                             name="lastName"
                             id="lastName"
-                            
-                            // value={formData.lastName}
+                            onChange={ handleChange }
+                            value={singleUser.lastName}
                             placeholder="Last Name"
                             className="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
                             />
@@ -392,8 +467,8 @@ export const CustomerList = () => {
                             name="dateOfBirth"
                             id="dateOfBirth"
                             placeholder="Date of birth"
-                            
-                            // value={formData.dateOfBirth}
+                            onChange={ handleChange }
+                            value={singleUser.dateOfBirth}
                             className="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
                             />
                             
@@ -409,15 +484,16 @@ export const CustomerList = () => {
                             <select className="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
                             name="status"
                             id="status"
-                            
+                            onChange={ handleChange }
                             // value={formData.status}
-                        >
-                                <option>active</option>
-                                <option>inactive</option>
-                                <option>deleted</option>
+                            >
+                                <option value="active" selected={(singleUser.status) === "active" ? true : false }>active</option>
+                                <option value="inactive" selected={(singleUser.status) === "inactive" ? true : false }>inactive</option>
+                                <option value="deleted" selected={(singleUser.status) === "deleted" ? true : false }>deleted</option>
                             </select>
                             
                         </div>
+                        
                         <div>
                             <button
                             className="hover:shadow-form rounded-md bg-[#6A64F1] py-3 px-8 text-base font-semibold text-white outline-none"
