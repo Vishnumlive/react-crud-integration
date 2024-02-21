@@ -1,5 +1,10 @@
-import { json } from "react-router-dom";
+
 import { useState } from "react";
+
+import { addCustomer } from "../services/customerService";
+
+import { toast } from "react-toastify";
+
 
 export const AddCustomer = () => {
 
@@ -11,24 +16,25 @@ export const AddCustomer = () => {
         "status" : "",
     }
 
+    
     const [formData, setFormData] = useState(initialFormData);
 
     async function addNewCustomer(userData){
-        const url = "http://localhost:8000/addCustomer";
-        const response = await fetch(url, {
-            method : "POST",
-            headers : {
-                'Content-Type' : "application/json"
-            },
-            body : JSON.stringify(userData)
-        });
+        
+        try{
 
-        const data = await response.json();
-
-        if(data._id){
-            setFormData(initialFormData);
+            const data = await addCustomer(userData);
             
-            console.log("User added successfullyy");
+            if(data._id){
+                setFormData(initialFormData);
+                
+                toast.success("User added successfully", { position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
+                
+            }
+
+        }catch(error){
+            
+            toast.error(error.message,{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
         }
     }
     
@@ -122,13 +128,7 @@ export const AddCustomer = () => {
                     value={formData.dateOfBirth}
                     className="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
                     />
-                    {/* <textarea
-                    rows="4"
-                    name="message"
-                    id="message"
-                    placeholder="Type your message"
-                    class="w-full resize-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-                    ></textarea> */}
+                    
                 </div>
 
                 <div className="mb-5">

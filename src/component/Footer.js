@@ -6,7 +6,7 @@ export const Footer = () => {
         <span className="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2030 <Link to="/" className="hover:underline">Grapelime</Link>. All Rights Reserved.
         </span>
         <ul className="flex flex-wrap items-center mt-3 text-sm font-medium text-gray-500 dark:text-gray-400 sm:mt-0">
-            <li>
+            {/* <li>
                 <Link to="#" target="_blank" className="hover:underline me-4 md:me-6">About</Link>
             </li>
             <li>
@@ -17,7 +17,7 @@ export const Footer = () => {
             </li>
             <li>
                 <Link to="#" target="_blank" className="hover:underline">Contact</Link>
-            </li>
+            </li> */}
         </ul>
     </footer>
   )

@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react"
+import { EditCustomer } from "../component";
+import { fetchCustomer,deleteCustomerById,getSingleUser,updateUserDetails } from "../services/customerService";
+import { toast } from "react-toastify";
 
 export const CustomerList = () => {
 
@@ -20,89 +23,85 @@ export const CustomerList = () => {
 
     const [singleUser, setSingleUser] = useState(initialUserData);
 
-    
+    // fetch customers
     useEffect(()=>{
 
-        var url = "http://localhost:8000/customers";
-
-        async function fetchCustomer(){
+        async function fetchCustomerList(){
+            
             try {
-                const result = await fetch(url);
-                const data = await result.json();
-
-                const formatedData = data.map((item) => (
+                const result = await fetchCustomer();
+                const formatedData = result.map((item) => (
                     {
                     ...item,
                     dateOfBirth: new Date(item.dateOfBirth).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',
-                    })
+                    })  
                 }))
                 setDeleted(false);
                 setUpdated(false);
                 setCustomers(formatedData);
-                console.log(data);
-            } catch (error) {
-                console.log(error);
-            }
+            }catch(error){
             
+                toast.error(error.message,{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
+            }
         }
+        
+        fetchCustomerList();
 
-        fetchCustomer();
     },[deleted,updated])
 
+    // delete customer
     async function deleteCustomer(userid){
         
-        var url = `http://localhost:8000/deleteCustomer/${userid}`;
+        try{
+            const data = await deleteCustomerById(userid);
 
-        const result = await fetch(url,{
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-              // You may need to include authentication headers or other headers as required by your API
-            },
-            // You can include a request body if needed
-            // body: JSON.stringify({}),
-          });
+            if(data){
+                
+                setDeleted(true);
 
-        if(result.ok){
-            setDeleted(true);
+                toast.success("User deleted successfully", { position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
+            }
+            
+        }catch(error){
+            
+            toast.error(error.message,{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
         }
-
     }
 
+    // get single user
     async function getUser(userid){
-        var url = `http://localhost:8000/customer/${userid}`;
 
-        const result = await fetch(url);
-        const data = await result.json();
-        
-        if(data){
+        try{
+            const data = await getSingleUser(userid);
 
             data.dateOfBirth = formatDate(data.dateOfBirth);
             setSingleUser(data);
+
+        }catch(error){
+            
+            toast.error(error.message,{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
         }
+        
     }
 
+    // update single user details
     async function updateUser(userData){
-        var url = `http://localhost:8000/customer/${userData._id}`
-
-        const result = await fetch(url,{
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              
-            },
-            body: JSON.stringify(userData),
-        });
-
-        const data = await result.json();
         
-        if(data){
+        try{
+            const data  = await updateUserDetails(userData);
 
-            setUpdated(true);
-            console.log("User Updated");
+            if(data){
+
+                setUpdated(true);
+                toast.success("User updated successfully", { position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
+            }
+
+        }catch(error){
+            
+            toast.error(error.message,{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
         }
     }
 
@@ -262,11 +261,11 @@ export const CustomerList = () => {
                   </thead>
                   <tbody>
                     
-                    { customers.map((customer) => (
+                    { customers.map((customer, id) => (
 
                         
                         
-                        <tr>
+                        <tr key={ id }>
                             <td
                             className="
                             text-center text-dark
@@ -399,111 +398,8 @@ export const CustomerList = () => {
                 </button>
                 <div className="modal-content">
                 {/* Modal content goes here */}
-                
-                <div className="flex items-center justify-center p-12">
-
-                    <div className="mx-auto w-full max-w-[550px]">
-                        <form  onSubmit={ handleEditSubmit } action="" method="POST">
-                        <div className="mb-5">
-                            <label
-                            htmlFor="firstName"
-                            className="mb-3 block text-base font-medium text-[#07074D]"
-                            >
-                            First Name
-                            </label>
-                            <input
-                            type="text"
-                            name="firstName"
-                            id="firstName"
-                            onChange={ handleChange }
-                            value={singleUser.firstName}
-                            placeholder="First Name"
-                            className="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-                            />
-                        </div>
-                        <div className="mb-5">
-                            <label
-                            htmlFor="middleName"
-                            className="mb-3 block text-base font-medium text-[#07074D]"
-                            >
-                            Middle Name
-                            </label>
-                            <input
-                            type="text"
-                            name="middleName"
-                            id="middleName"
-                            onChange={ handleChange }
-                            value={singleUser.middleName}
-                            placeholder="Middle Name"
-                            className="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-                            />
-                        </div>
-                        <div className="mb-5">
-                            <label
-                            htmlFor="lastName"
-                            className="mb-3 block text-base font-medium text-[#07074D]"
-                            >
-                            Last Name
-                            </label>
-                            <input
-                            type="text"
-                            name="lastName"
-                            id="lastName"
-                            onChange={ handleChange }
-                            value={singleUser.lastName}
-                            placeholder="Last Name"
-                            className="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-                            />
-                        </div>
-                        <div className="mb-5">
-                            <label
-                            htmlFor="message"
-                            className="mb-3 block text-base font-medium text-[#07074D]"
-                            >
-                            Date of birth
-                            </label>
-                            <input
-                            type="date"
-                            name="dateOfBirth"
-                            id="dateOfBirth"
-                            placeholder="Date of birth"
-                            onChange={ handleChange }
-                            value={singleUser.dateOfBirth}
-                            className="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-                            />
-                            
-                        </div>
-
-                        <div className="mb-5">
-                            <label
-                            htmlFor="status"
-                            className="mb-3 block text-base font-medium text-[#07074D]"
-                            >
-                            User Status
-                            </label>
-                            <select className="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md"
-                            name="status"
-                            id="status"
-                            onChange={ handleChange }
-                            // value={formData.status}
-                            >
-                                <option value="active" selected={(singleUser.status) === "active" ? true : false }>active</option>
-                                <option value="inactive" selected={(singleUser.status) === "inactive" ? true : false }>inactive</option>
-                                <option value="deleted" selected={(singleUser.status) === "deleted" ? true : false }>deleted</option>
-                            </select>
-                            
-                        </div>
-                        
-                        <div>
-                            <button
-                            className="hover:shadow-form rounded-md bg-[#6A64F1] py-3 px-8 text-base font-semibold text-white outline-none"
-                            >
-                            Update
-                            </button>
-                        </div>
-                        </form>
-                    </div>
-                </div>
+                    <EditCustomer singleUser={singleUser} handleChange={handleChange} handleEditSubmit={handleEditSubmit}/>
+            
                 </div>
             </div>
         </div>
