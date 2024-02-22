@@ -1,9 +1,17 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom";
+
 import { EditCustomer } from "../component";
 import { fetchCustomer,deleteCustomerById,getSingleUser,updateUserDetails } from "../services/customerService";
+import { logout } from "../services/authService";
+
 import { toast } from "react-toastify";
 
+
+
 export const CustomerList = () => {
+
+    const navigate = useNavigate();
 
     const initialUserData = {
         "firstName" : "",
@@ -30,6 +38,15 @@ export const CustomerList = () => {
             
             try {
                 const result = await fetchCustomer();
+                
+                if(result.message ==="auth-failed"){
+                    // error condition
+                    logout();
+                    navigate("/login");
+                    toast.error("Please login again",{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
+                    return true;
+                }
+                
                 const formatedData = result.map((item) => (
                     {
                     ...item,
@@ -58,6 +75,15 @@ export const CustomerList = () => {
         try{
             const data = await deleteCustomerById(userid);
 
+            if(data.message ==="auth-failed"){
+                // error condition
+                logout();
+                navigate("/login");
+                toast.error("Please login again",{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
+                return true;
+            }
+
+
             if(data){
                 
                 setDeleted(true);
@@ -77,6 +103,14 @@ export const CustomerList = () => {
         try{
             const data = await getSingleUser(userid);
 
+            if(data.message ==="auth-failed"){
+                // error condition
+                logout();
+                navigate("/login");
+                toast.error("Please login again",{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
+                return true;
+            }
+
             data.dateOfBirth = formatDate(data.dateOfBirth);
             setSingleUser(data);
 
@@ -92,6 +126,14 @@ export const CustomerList = () => {
         
         try{
             const data  = await updateUserDetails(userData);
+
+            if(data.message ==="auth-failed"){
+                // error condition
+                logout();
+                navigate("/login");
+                toast.error("Please login again",{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
+                return true;
+            }
 
             if(data){
 

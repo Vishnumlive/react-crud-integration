@@ -1,6 +1,19 @@
 import { Link, NavLink } from "react-router-dom";
 
+import { useNavigate } from "react-router-dom";
+
+import { logout } from "../services/authService";
+
 export const Header = () => {
+
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+      
+      logout();
+      navigate("/login");
+    
+    }
 
     return (
         <header>
@@ -34,6 +47,10 @@ export const Header = () => {
                     </li>
                     <li>
                       <NavLink to="/add" className="">Add Customer</NavLink>
+                    </li>
+
+                    <li>
+                      <NavLink onClick={ handleLogout } to="/login" className="">Logout</NavLink>
                     </li>
                     
                   </ul>

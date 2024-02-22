@@ -1,19 +1,24 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { addCustomer } from "../services/customerService";
+import { logout } from "../services/authService";
 
 import { toast } from "react-toastify";
 
 
+
 export const AddCustomer = () => {
+
+    const navigate = useNavigate();
 
     const initialFormData = {
         "firstName" : "",
         "middleName" : "",
         "lastName" : "",
         "dateOfBirth" : "",
-        "status" : "",
+        "status" : "active",
     }
 
     
@@ -24,6 +29,14 @@ export const AddCustomer = () => {
         try{
 
             const data = await addCustomer(userData);
+
+            if(data.message  ==="auth-failed"){
+                // error condition
+                logout();
+                navigate("/login");
+                toast.error("Please login again",{ position: "bottom-center", autoClose: 3000, hideProgressBar: false, closeOnClick: false,theme: "light"});
+                return true;
+            }
             
             if(data._id){
                 setFormData(initialFormData);

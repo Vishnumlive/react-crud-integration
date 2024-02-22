@@ -1,8 +1,16 @@
+
+
 export async function fetchCustomer(){
 
     var url = "http://localhost:8000/customers";
 
-    const response = await fetch(url);
+    const response = await fetch(url,{
+        headers: {
+            accept: "application/json",
+            "content-type": "application/json"
+        },
+        credentials: "include",
+    });
 
     if(!response.ok){
         throw {message : response.statusText, statusCode : response.status} // eslint-disable-line
@@ -22,7 +30,7 @@ export async function deleteCustomerById(userid){
         headers: {
             'Content-Type': 'application/json',
         },
-        
+        credentials: "include",
     });
     
     if(!response.ok){
@@ -39,7 +47,13 @@ export async function getSingleUser(userid){
    
     var url = `http://localhost:8000/customer/${userid}`;
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+        headers: {
+            accept: "application/json",
+            "content-type": "application/json"
+        },
+        credentials: "include",
+    });
     if(!response.ok){
         throw {message : response.statusText, statusCode : response.status} // eslint-disable-line
     }
@@ -57,8 +71,10 @@ export async function updateUserDetails(userData){
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
+            accept: "application/json",
             
         },
+        credentials: "include",
         body: JSON.stringify(userData),
     });
 
@@ -82,6 +98,7 @@ export async function addCustomer(userDetails){
         headers : {
             'Content-Type' : "application/json"
         },
+        credentials: "include",
         body : JSON.stringify(userDetails)
     });
 
